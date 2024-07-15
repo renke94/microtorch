@@ -2,6 +2,10 @@
 A minimal PyTorch clone using plain NumPy. 
 This framework is for educational use only!
 
+Inspiration for this implementation comes from:
+- [micrograd](https://github.com/karpathy/micrograd) by Andrej Karpathy
+- [PyTorch](https://pytorch.org/) by Meta
+
 ## Examples
 
 ### XOR
@@ -48,6 +52,5 @@ pred = model(x)
 #        [0.00223828]])
 ~~~
 
-Inspiration for this implementation comes from:
-- [micrograd](https://github.com/karpathy/micrograd) by Andrej Karpathy
-- [PyTorch](https://pytorch.org/) by Meta
+# Todo's
+- [ ] Implementing a generic backward function for array broadcasting
