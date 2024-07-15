@@ -1,6 +1,5 @@
 # microtorch
 A minimal PyTorch clone using plain NumPy. 
-This framework is for educational use only!
 
 Inspiration for this implementation comes from:
 - [micrograd](https://github.com/karpathy/micrograd) by Andrej Karpathy
@@ -52,5 +51,11 @@ pred = model(x)
 #        [0.00223828]])
 ~~~
 
-# Todo's
+## Todo's
 - [ ] Implementing a generic backward function for array broadcasting
+
+## Contributions
+This framework is for educational purposes.
+Ideas, suggestions, and issues are welcome! 
+Feel free to open an issue or submit a pull request.
+Thank you for your support!
