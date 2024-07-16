@@ -58,6 +58,7 @@ pred = model(x)
 - [x] Implementing a generic backward function for array broadcasting
 - [ ] Stable Sigmoid backward implementation
 - [ ] Optimizer implementations
+- [ ] Weight initialization (Xavier and He)
 
 ## Contributions
 This framework is for educational purposes.
