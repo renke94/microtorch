@@ -70,3 +70,4 @@ class LeakyReLU(Module):
 
     def __call__(self, x):
         return Tensor.leaky_relu(x, negative_slope=self.negative_slope)
+
