@@ -9,6 +9,7 @@ Inspiration for this implementation comes from:
 
 ### XOR
 ~~~Python
+import numpy as np
 from microtorch import Tensor
 from microtorch import nn
 
@@ -21,6 +22,7 @@ x = Tensor([
 
 y = Tensor([[0.0, 1.0, 1.0, 0.0]]).T
 
+np.random.seed(42)
 model = nn.Sequential(
     nn.Linear(2, 16),
     nn.LeakyReLU(0.01),
@@ -45,14 +47,15 @@ for i in range(1000):
     optimize(model.params(), lr=0.1)
 
 pred = model(x)
-#Tensor([[0.01606589],
-#        [0.99038489],
-#        [0.99465307],
-#        [0.00223828]])
+#Tensor([[0.02210465],
+#        [0.98219411],
+#        [0.9799512 ],
+#        [0.0193837 ]])
 ~~~
 
 ## Todo's
-- [ ] Implementing a generic backward function for array broadcasting
+- [x] Implementing a generic backward function for array broadcasting
+- [ ] Stable Sigmoid backward implementation
 
 ## Contributions
 This framework is for educational purposes.
