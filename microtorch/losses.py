@@ -40,6 +40,7 @@ class BCEWithLogitsLoss(Module):
         out = Tensor(o, _children=(logits,))
 
         def bce_with_logits_backward():
+            # (1/N) * sigmoid(z) - y * out.grad
             logits.grad += (1 / (1 + np.exp(-z)) - y) / len(y) * out.grad
 
         out._backward = bce_with_logits_backward

@@ -13,6 +13,7 @@ import numpy as np
 from microtorch import Tensor
 from microtorch import nn
 from microtorch.optim import Adam
+from microtorch.losses import BCEWithLogitsLoss
 
 x = Tensor([
     [0.0, 0.0],
@@ -31,29 +32,31 @@ model = nn.Sequential(
     nn.Linear(16, 16),
     nn.Sigmoid(),
     nn.Linear(16, 1),
-    nn.Sigmoid()
 )
 
-optimizer = Adam(model.params(), lr=0.1)
+optimizer = Adam(model.params(), lr=0.01)
 
-for i in range(1000):
-    loss = Tensor.l2(model(x), y)
+bce = BCEWithLogitsLoss()
+
+for i in range(200):
+    loss = bce(model(x), y)
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
 
-pred = model(x)
-# Tensor([[0.00644011],
-#         [0.99703074],
-#         [0.99702374],
-#         [0.0016798 ]])
+pred = model(x).sigmoid()
+# Tensor([[0.00218708],
+#         [0.99718049],
+#         [0.99636125],
+#         [0.00461519]])
 ~~~
 
 ## Todo's
 - [x] Implementing a generic backward function for array broadcasting
 - [x] Optimizer implementations
 - [x] Weight initialization (Xavier and He)
-- [ ] BCE and CE losses
+- [x] BCELoss and BCEWithLogitsLoss
+- [ ] Softmax and Categorical Cross Entropy
 
 ## Contributions
 This framework is for educational purposes.
