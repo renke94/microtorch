@@ -6,7 +6,14 @@ from .tensor import Tensor
 
 class MSELoss(Module):
     def __call__(self, input: Tensor, target: Tensor) -> Tensor:
-        return Tensor.l2(input, target)
+        o = np.sum((input.data - target.data) ** 2) / len(target)
+        out = Tensor(o, _children=(input,))
+
+        def mse_backward():
+            input.grad += (input.data - target.data) * 2 / len(target) * out.grad
+
+        out._backward = mse_backward
+        return out
 
 
 class BCELoss(Module):
@@ -24,8 +31,23 @@ class BCELoss(Module):
         return out
 
 
+class BCEWithLogitsLoss(Module):
+    def __call__(self, logits: Tensor, target: Tensor) -> Tensor:
+        z = logits.data
+        y = target.data
+        o = np.sum(np.maximum(0, z) - z * y + np.log(1 + np.exp(-np.abs(z)))) / len(y)
+
+        out = Tensor(o, _children=(logits,))
+
+        def bce_with_logits_backward():
+            logits.grad += (1 / (1 + np.exp(-z)) - y) / len(y) * out.grad
+
+        out._backward = bce_with_logits_backward
+        return out
+
+
 if __name__ == '__main__':
-    bce = BCELoss()
+    bce = BCEWithLogitsLoss()
     p = Tensor([[0.3367], [0.1288], [0.2345], [0.2303]])
     y = Tensor([[0.0], [1.0], [0.0], [0.0]])
 
