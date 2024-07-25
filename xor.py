@@ -18,21 +18,19 @@ y = Tensor([
     [0.0],
 ])
 
-np.random.seed(42)
+#np.random.seed(42)
 model = nn.Sequential(
     nn.Linear(2, 16),
     nn.Sigmoid(),
-    #nn.LeakyReLU(0.01),
     nn.Linear(16, 16),
     nn.Sigmoid(),
-    #nn.LeakyReLU(0.01),
     nn.Linear(16, 1),
     nn.Sigmoid()
 )
 
 
 if __name__ == '__main__':
-    optimizer = Adam(model.params(), lr=0.001)
+    optimizer = Adam(model.params(), lr=0.1)
     for i in range(1000):
         loss = Tensor.l2(model(x), y)
         loss.backward()
