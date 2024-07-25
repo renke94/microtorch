@@ -27,9 +27,9 @@ np.random.seed(42)
 
 model = nn.Sequential(
     nn.Linear(2, 16),
-    nn.LeakyReLU(0.01),
+    nn.Sigmoid(),
     nn.Linear(16, 16),
-    nn.LeakyReLU(0.01),
+    nn.Sigmoid(),
     nn.Linear(16, 1),
     nn.Sigmoid()
 )
