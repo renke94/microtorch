@@ -51,9 +51,9 @@ pred = model(x)
 
 ## Todo's
 - [x] Implementing a generic backward function for array broadcasting
-- [ ] Stable Sigmoid backward implementation
-- [ ] Optimizer implementations
-- [ ] Weight initialization (Xavier and He)
+- [x] Optimizer implementations
+- [x] Weight initialization (Xavier and He)
+- [ ] BCE and CE losses
 
 ## Contributions
 This framework is for educational purposes.
