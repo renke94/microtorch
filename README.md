@@ -12,6 +12,7 @@ Inspiration for this implementation comes from:
 import numpy as np
 from microtorch import Tensor
 from microtorch import nn
+from microtorch.optim import SGD
 
 x = Tensor([
     [0.0, 0.0],
@@ -33,19 +34,13 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 
-def optimize(params, lr=0.001):
-    for p in params:
-        p.data -= lr * p.grad
-        
-def zero_grad(*params):
-    for p in params:
-        p.zero_grad()
+optimizer = SGD(model.params(), lr=0.1)
 
 for i in range(1000):
     loss = Tensor.l2(model(x), y)
-    zero_grad(*model.params(), x)
     loss.backward()
-    optimize(model.params(), lr=0.1)
+    optimizer.step()
+    optimizer.zero_grad()
 
 pred = model(x)
 # Tensor([[0.02210465],
