@@ -18,7 +18,7 @@ y = Tensor([
     [0.0],
 ])
 
-#np.random.seed(42)
+np.random.seed(42)
 model = nn.Sequential(
     nn.Linear(2, 16),
     nn.Sigmoid(),

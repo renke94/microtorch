@@ -12,7 +12,7 @@ Inspiration for this implementation comes from:
 import numpy as np
 from microtorch import Tensor
 from microtorch import nn
-from microtorch.optim import SGD
+from microtorch.optim import Adam
 
 x = Tensor([
     [0.0, 0.0],
@@ -34,7 +34,7 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 
-optimizer = SGD(model.params(), lr=0.1)
+optimizer = Adam(model.params(), lr=0.1)
 
 for i in range(1000):
     loss = Tensor.l2(model(x), y)
@@ -43,10 +43,10 @@ for i in range(1000):
     optimizer.zero_grad()
 
 pred = model(x)
-# Tensor([[0.05779856],
-#         [0.96482604],
-#         [0.9663342 ],
-#         [0.03822627]])
+# Tensor([[0.00644011],
+#         [0.99703074],
+#         [0.99702374],
+#         [0.0016798 ]])
 ~~~
 
 ## Todo's
