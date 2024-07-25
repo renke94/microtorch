@@ -1,4 +1,5 @@
 from .tensor import Tensor
+from .initializers import xavier_uniform_initialization, kaiming_he_initialization
 
 
 def param(t: Tensor) -> Tensor:
@@ -44,8 +45,8 @@ class Linear(Module):
     def __init__(self, fan_in, fan_out):
         self.fan_in = fan_in
         self.fan_out = fan_out
-        self.w = param(Tensor.randn(fan_in, fan_out))
-        self.b = param(Tensor.randn(1, fan_out))
+        self.w = param(kaiming_he_initialization(fan_in, fan_out))
+        self.b = param(Tensor.zeros(1, fan_out))
 
     def __repr__(self):
         return f"Linear({self.fan_in}, {self.fan_out})"

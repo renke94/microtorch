@@ -217,8 +217,12 @@ class Tensor:
             node._backward()
 
     @staticmethod
-    def ones(shape):
+    def ones(*shape):
         return Tensor(np.ones(shape))
+
+    @staticmethod
+    def zeros(*shape):
+        return Tensor(np.zeros(shape))
 
     @staticmethod
     def randn(*shape):
