@@ -3,6 +3,7 @@ import numpy as np
 from microtorch import Tensor
 from microtorch import nn
 from microtorch.optim import SGD, Adam
+from microtorch.losses import MSELoss, BCELoss
 
 x = Tensor([
     [0.0, 0.0],
@@ -28,14 +29,18 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 
+mse = MSELoss()
+bce = BCELoss()
 
 if __name__ == '__main__':
-    optimizer = Adam(model.params(), lr=0.1)
+    optimizer = Adam(model.params(), lr=0.001)
     for i in range(1000):
-        loss = Tensor.l2(model(x), y)
+        loss = bce(model(x), y)
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
 
     pred = model(x)
     print(pred)
+
+
