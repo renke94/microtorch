@@ -47,6 +47,31 @@ class BCEWithLogitsLoss(Module):
         return out
 
 
+class CrossEntropyLoss(Module):
+    def __call__(self, logits: Tensor, target: Tensor) -> Tensor:
+        # calculate softmax
+        m = logits.data.max()
+        e = np.exp(logits.data - m)
+        s = e / e.sum(axis=-1, keepdims=True)
+        n = s.shape[0]
+
+        if isinstance(target, Tensor):
+            target = target.data
+
+        rows = np.arange(n)
+        ce = - np.log(s[rows, target]).sum() / n
+        out = Tensor(ce, _children=(logits,))
+
+        def cross_entropy_backward():
+            onehot = np.zeros_like(s)
+            onehot[rows, target] = 1.0
+            logits.grad += (s - onehot) / n * out.grad
+
+        out._backward = cross_entropy_backward
+        return out
+
+
+
 if __name__ == '__main__':
     bce = BCEWithLogitsLoss()
     p = Tensor([[0.3367], [0.1288], [0.2345], [0.2303]])
