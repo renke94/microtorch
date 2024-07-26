@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 
@@ -150,6 +152,16 @@ class Tensor:
             self.grad += o * (1 - o) * out.grad
 
         out._backward = _backward
+
+        return out
+
+    def softmax(self, dim: int = -1):
+        m = self.data.max()
+        e = np.exp(self.data - m)
+        out = Tensor(e, _children=(self,), _op='softmax')
+
+        # TODO: Implement backward
+        warnings.warn("Backpropagation for softmax is not implemented yet.")
 
         return out
 
