@@ -161,14 +161,13 @@ class Tensor:
         s = e / e.sum(axis=dim, keepdims=True)
         out = Tensor(s, _children=(self,), _op='softmax')
 
-        s = np.moveaxis(s, dim, -1)
-        shape = s.shape
-        s = s.reshape(-1, s.shape[-1])
-
         def softmax_backward():
-            grad = np.zeros_like(s)
-            for i in range(len(s)):
-                si = s[i].reshape(1, -1)
+            _s = np.moveaxis(s, dim, -1)
+            shape = _s.shape
+            _s = _s.reshape(-1, _s.shape[-1])
+            grad = np.zeros_like(_s)
+            for i in range(len(_s)):
+                si = _s[i].reshape(1, -1)
                 j = np.diagflat(si) - si.T @ si  # jacobian matrix
                 grad[i] += j.sum(-1)
             grad = grad.reshape(shape)
