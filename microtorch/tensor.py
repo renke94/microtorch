@@ -158,11 +158,24 @@ class Tensor:
     def softmax(self, dim: int = -1):
         m = self.data.max()
         e = np.exp(self.data - m)
-        out = Tensor(e, _children=(self,), _op='softmax')
+        s = e / e.sum(axis=dim, keepdims=True)
+        out = Tensor(s, _children=(self,), _op='softmax')
 
-        # TODO: Implement backward
-        warnings.warn("Backpropagation for softmax is not implemented yet.")
+        s = np.moveaxis(s, dim, -1)
+        shape = s.shape
+        s = s.reshape(-1, s.shape[-1])
 
+        def softmax_backward():
+            grad = np.zeros_like(s)
+            for i in range(len(s)):
+                si = s[i].reshape(1, -1)
+                j = np.diagflat(si) - si.T @ si  # jacobian matrix
+                grad[i] += j.sum(-1)
+            grad = grad.reshape(shape)
+            grad = np.moveaxis(grad, -1, dim)
+            self.grad += grad
+
+        out._backward = softmax_backward
         return out
 
     def exp(self):
