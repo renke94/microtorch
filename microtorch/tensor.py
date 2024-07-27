@@ -193,6 +193,17 @@ class Tensor:
         out._backward = reshape_backward
         return out
 
+    def permute(self, *dims):
+        out = Tensor(self.data.transpose(*dims), _children=(self,), _op='permute')
+
+        def permute_backward():
+            r = {b: a for a, b in enumerate(dims)}
+            r = [r[i] for i in range(len(r))]
+            self.grad += out.grad.transpose(*r)
+
+        out._backward = permute_backward
+        return out
+
     def exp(self):
         out = Tensor(np.exp(self.data), _children=(self,), _op='exp')
 
