@@ -178,6 +178,15 @@ class Tensor:
         out._backward = softmax_backward
         return out
 
+    def reshape(self, *shape):
+        out = Tensor(self.data.reshape(*shape), _children=(self,), _op='reshape')
+
+        def reshape_backward():
+            self.grad += out.grad.reshape(self.shape)
+
+        out._backward = reshape_backward
+        return out
+
     def exp(self):
         out = Tensor(np.exp(self.data), _children=(self,), _op='exp')
 

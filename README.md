@@ -58,7 +58,7 @@ pred = model(x).sigmoid()
 - [x] BCELoss and BCEWithLogitsLoss
 - [x] Softmax and Categorical Cross Entropy
 - [x] MNIST image classification
-- [ ] Tensor operations for reshape (and more)
+- [x] Tensor operations for reshape (and more)
 
 ## Contributions
 This framework is for educational purposes.
