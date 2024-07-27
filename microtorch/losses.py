@@ -47,6 +47,7 @@ class BCEWithLogitsLoss(Module):
         return out
 
 
+# https://towardsdatascience.com/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1
 class CrossEntropyLoss(Module):
     def __call__(self, logits: Tensor, target: Tensor) -> Tensor:
         # calculate softmax

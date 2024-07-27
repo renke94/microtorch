@@ -155,6 +155,7 @@ class Tensor:
 
         return out
 
+    # https://towardsdatascience.com/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1
     def softmax(self, dim: int = -1):
         m = self.data.max()
         e = np.exp(self.data - m)

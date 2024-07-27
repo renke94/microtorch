@@ -56,7 +56,9 @@ pred = model(x).sigmoid()
 - [x] Optimizer implementations
 - [x] Weight initialization (Xavier and He)
 - [x] BCELoss and BCEWithLogitsLoss
-- [ ] Softmax and Categorical Cross Entropy
+- [x] Softmax and Categorical Cross Entropy
+- [x] MNIST image classification
+- [ ] Tensor operations for reshape (and more)
 
 ## Contributions
 This framework is for educational purposes.

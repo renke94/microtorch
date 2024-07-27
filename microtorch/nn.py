@@ -18,8 +18,17 @@ class Module:
 
         return filter(lambda v: v.requires_grad, (v for k, v in self.__dict__.items()))
 
+
+    def forward(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
+
     def __repr__(self):
         return self.__class__.__name__ + "()"
+
+
 
 
 class Sequential(Module):
