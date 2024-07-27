@@ -31,7 +31,13 @@ class Tensor:
 
     @property
     def T(self):
-        return Tensor(self.data.T)
+        out = Tensor(self.data.T, _children=(self,), _op='transpose')
+
+        def transpose_backward():
+            self.grad += out.grad.T
+
+        out._backward = transpose_backward
+        return out
 
     def __repr__(self):
         # to appropriately aligns columns
