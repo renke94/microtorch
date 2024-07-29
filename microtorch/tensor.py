@@ -247,6 +247,7 @@ class Tensor:
         return out
 
     def sum(self):
+        # TODO: Handle dims
         out = Tensor(np.sum(self.data), _children=(self,), _op='sum')
 
         def _backward():
