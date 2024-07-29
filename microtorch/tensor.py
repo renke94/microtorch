@@ -48,6 +48,15 @@ class Tensor:
     def __len__(self):
         return len(self.data)
 
+    def __getitem__(self, idx):
+        out = Tensor(self.data[idx], _children=(self,), _op='indexing')
+
+        def indexing_backward():
+            self.grad[idx] += out.grad
+
+        out._backward = indexing_backward
+        return out
+
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         if self.shape != other.shape:
