@@ -59,6 +59,8 @@ pred = model(x).sigmoid()
 - [x] Softmax and Categorical Cross Entropy
 - [x] MNIST image classification
 - [x] Tensor operations for reshape (and more)
+- [ ] Indexing with backward
+- [ ] Batch matrix multiplication
 
 ## Contributions
 This framework is for educational purposes.
