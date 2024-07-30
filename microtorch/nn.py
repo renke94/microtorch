@@ -81,3 +81,11 @@ class LeakyReLU(Module):
     def __call__(self, x):
         return Tensor.leaky_relu(x, negative_slope=self.negative_slope)
 
+
+class Flatten(Module):
+    def __init__(self, start_dim=1, end_dim=-1):
+        self.start_dim = start_dim
+        self.end_dim = end_dim
+    def __call__(self, x: Tensor):
+        return x.flatten(self.start_dim, self.end_dim)
+

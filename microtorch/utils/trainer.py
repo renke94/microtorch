@@ -2,7 +2,7 @@ import sys
 
 from tqdm import tqdm
 
-from .data import DataLoader
+from ..data import DataLoader
 from .loss_dict import LossDict
 from ..nn import Module
 from ..optim import Optimizer

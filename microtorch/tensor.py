@@ -1,4 +1,4 @@
-import warnings
+from typing import Sequence
 
 import numpy as np
 
@@ -202,6 +202,12 @@ class Tensor:
         out._backward = reshape_backward
         return out
 
+    def flatten(self, start_dim=0, end_dim=-1):
+        shape = list(self.shape)
+        shape[end_dim] = -1
+        del shape[start_dim:end_dim]
+        return self.reshape(*shape)
+
     def permute(self, *dims):
         out = Tensor(self.data.transpose(*dims), _children=(self,), _op='permute')
 
@@ -319,6 +325,10 @@ def broadcast(a: Tensor, b: Tensor):
 
     _b._backward = b_backward
     return _a, _b
+
+
+def stack(tensors: Sequence[Tensor], dim=0):
+    return Tensor(np.stack([t.data for t in tensors], axis=dim))
 
 
 def test():
