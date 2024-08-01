@@ -3,6 +3,16 @@ from typing import Sequence
 import numpy as np
 
 
+class Index:
+    def __init__(self, dim: int, ndims: int):
+        if dim < 0:
+            dim = ndims + dim
+        self.slices: list[slice] = [slice(None) for _ in range(dim)]
+
+    def __getitem__(self, item):
+        return tuple(self.slices + [item])
+
+
 class Tensor:
     def __init__(self, data, _children=(), requires_grad=False, _op=''):
         if not isinstance(data, np.ndarray):
@@ -263,6 +273,54 @@ class Tensor:
 
         return out
 
+    def chunk(self, chunks: int, dim: int = 0):
+        out = np.split(self.data, chunks, axis=dim)
+        out = tuple([Tensor(t, _children=(self,), _op='chunk') for t in out])
+
+        size = self.shape[dim] // chunks
+        index = Index(dim, self.dim)
+
+        def backward_factory(t: Tensor, idx):
+            def chunk_backward():
+                self.grad[idx] += t.grad
+
+            t._backward = chunk_backward
+
+        for i, t in enumerate(out):
+            backward_factory(t, index[i * size:i * size + size])
+
+        return out
+
+    def split(self, split_size_or_sections, dim: int = 0):
+        out = split_numpy(self.data, split_size_or_sections, dim)
+        out = tuple([Tensor(t, _children=(self,), _op='split') for t in out])
+
+        index = Index(dim, self.dim)
+
+        def backward_factory(t: Tensor, idx):
+            def split_backward():
+                self.grad[idx] += t.grad
+
+            t._backward = split_backward
+
+        sections = [0] + [t.shape[dim] for t in out]
+        sections = np.cumsum(sections)
+        for t, start, end in zip(out, sections[:-1], sections[1:]):
+            backward_factory(t, index[start:end])
+
+        return out
+
+    def squeeze(self, dim: int):
+        assert self.shape[dim] == 1, "squeeze dimension must be 1"
+        shape = list(self.shape)
+        del shape[dim]
+        return self.reshape(*shape)
+
+    def unsqueeze(self, dim: int):
+        shape = list(self.shape)
+        shape.insert(dim, 1)
+        return self.reshape(*shape)
+
     def backward(self):
         topo = []
         visited = set()
@@ -327,8 +385,56 @@ def broadcast(a: Tensor, b: Tensor):
     return _a, _b
 
 
+def split_numpy(arr: np.ndarray, split_size_or_sections, axis: int = 0, append_remainder=False):
+    if isinstance(split_size_or_sections, int):
+        s = arr.shape[axis] / split_size_or_sections
+        if s.is_integer():
+            s = int(s)
+        else:
+            raise ValueError(f"arr shape[{axis}] ({arr.shape[axis]}) is not divisable by {split_size_or_sections}")
+        return np.split(arr, s, axis=axis)
+    else:
+        r = [s is ... for s in split_size_or_sections]
+        c = np.count_nonzero(r)
+        if c > 1:
+            raise ValueError(f"Ellipsis ... is used more than once in sections")
+        elif c == 1:
+            s = np.array(split_size_or_sections)
+            s[r] = 0
+            s[r] = arr.shape[axis] - s.sum()
+        else:
+            s = split_size_or_sections
+
+        s = np.cumsum(s)
+        splits = np.split(arr, s, axis=axis)
+        del splits[-1]
+        return splits
+
+
 def stack(tensors: Sequence[Tensor], dim=0):
-    return Tensor(np.stack([t.data for t in tensors], axis=dim))
+    out = np.stack([t.data for t in tensors], axis=dim)
+    out = Tensor(out, _children=tensors, _op='stack')
+
+    def stack_backward():
+        grads = split_numpy(out.grad, 1, axis=dim)
+        for t, g in zip(tensors, grads):
+            t.grad += np.squeeze(g, axis=dim)
+
+    out._backward = stack_backward
+    return out
+
+
+def concat(tensors: Sequence[Tensor], dim=0):
+    out = np.concatenate([t.data for t in tensors], axis=dim)
+    out = Tensor(out, _children=tensors, _op='concat')
+
+    def concat_backward():
+        grads = split_numpy(out.grad, [t.shape[dim] for t in tensors], axis=dim)
+        for t, g in zip(tensors, grads):
+            t.grad += g
+
+    out._backward = concat_backward
+    return out
 
 
 def test():
@@ -340,8 +446,10 @@ def test():
     ])
 
     np.random.seed(42)
-    w = Tensor.randn(2, 4); w.label = 'w'
-    b = Tensor.randn(1, 4); b.label = 'b'
+    w = Tensor.randn(2, 4);
+    w.label = 'w'
+    b = Tensor.randn(1, 4);
+    b.label = 'b'
 
     xw = x @ w
     out = xw + b
@@ -349,6 +457,7 @@ def test():
 
     print(w.grad)
     print(b.grad)
+
 
 if __name__ == '__main__':
     test()
