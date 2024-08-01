@@ -1,1 +1,1 @@
-from .tensor import Tensor, stack
+from .tensor import Tensor, stack, concat
