@@ -60,7 +60,10 @@ pred = model(x).sigmoid()
 - [x] MNIST image classification
 - [x] Tensor operations for reshape (and more)
 - [x] Indexing with backward
-- [ ] Batch matrix multiplication
+- [x] Einsum
+- [ ] Variable Linear Layer
+- [ ] Transformer
+- [ ] Convolution
 
 ## Contributions
 This framework is for educational purposes.
