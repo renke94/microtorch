@@ -4,32 +4,47 @@ version = "0.1.0"
 description = "A minimal PyTorch clone for educational purposes using plain NumPy"
 readme = "README.md"
 authors = [
-
+    { name = "Renke Hohl", email = "renke.hohl@schmidt-embedded-systems.de" },
+]
+keywords = ["autograd", "deep-learning", "education", "neural-networks", "numpy"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.12"
 
 # https://docs.astral.sh/uv/concepts/projects/dependencies/#adding-dependencies
 dependencies = [
-    "dotenv>=0.9.9",
-    "fastapi>=0.120.4",
     "numpy>=2.3.4",
-    "pydantic>=2.12.3",
-    "python-multipart>=0.0.20",
-    "torch>=2.9.0",
     "tqdm>=4.67.1",
-    "uvicorn>=0.38.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/renke94/microtorch"
+Repository = "https://github.com/renke94/microtorch"
+Issues = "https://github.com/renke94/microtorch/issues"
 
 [project.scripts]
 main = "microtorch:main"
-gpt = "tests.mha_test:main"
+gpt = "microtorch.examples.gpt:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.uv]
+package = true
+
 [tool.hatch.build.targets.wheel]
-packages = ["src/microtorch", "src/tests"]
+packages = ["src/microtorch"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/microtorch", "README.md"]
 
 
 [dependency-groups]
@@ -40,8 +55,18 @@ lint = [
 
 dev = [
     "black>=25.9.0",
+    "dotenv>=0.9.9",
+    "fastapi>=0.120.4",
+    "ipykernel>=7.3.0",
+    "jupyter>=1.1.1",
+    "jupyterlab>=4.6.2",
+    "lab>=8.10",
     "lefthook>=2.0.2",
+    "pydantic>=2.12.3",
     "pytest>=8.4.2",
+    "python-multipart>=0.0.20",
+    "torch>=2.9.0",
+    "uvicorn>=0.38.0",
 ]
 
 docs = []

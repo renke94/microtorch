@@ -1,4 +1,7 @@
+"""Character-level GPT trained on tiny-shakespeare with microtorch."""
+
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import numpy as np
@@ -12,37 +15,48 @@ from microtorch.tensor import Tensor, concat, multinomial, stack
 
 MHA_TYPE = type[MultiheadAttentionSlow | MultiheadAttentionFast]
 
-with open('datasets/tiny-shakespeare.txt', 'r') as file:
-    text = file.read()
-
-chars = sorted(set(text))
-vocab_size = len(chars)
-
-stoi = { ch:i for i, ch in enumerate(chars)}
-itos = { i:ch for i, ch in enumerate(chars)}
+DATASET_PATH = Path('datasets/tiny-shakespeare.txt')
+BATCH_SIZE = 16
+BLOCK_SIZE = 64
+NUM_EPOCHS = 10
+STEPS_PER_EPOCH = 5000
 
 
-def encode(s: str) -> list[int]:
-    return [stoi[c] for c in s]
+class CharTokenizer:
+    """Character-level tokenizer derived from a corpus."""
 
-def decode(l: list[int]) -> str:
-    return ''.join([itos[i] for i in l])
+    def __init__(self, text: str) -> None:
+        self.chars = sorted(set(text))
+        self.stoi = {ch: i for i, ch in enumerate(self.chars)}
+        self.itos = {i: ch for i, ch in enumerate(self.chars)}
 
-data = Tensor(encode(text))
-n = int(0.9 * len(data))
-train_data = data[:n]
-val_data = data[n:]
+    @property
+    def vocab_size(self) -> int:
+        """Number of distinct characters in the corpus."""
+        return len(self.chars)
 
-np.random.seed(1337)
-batch_size = 16
-block_size = 64
+    def encode(self, s: str) -> list[int]:
+        """Turn a string into a list of token ids."""
+        return [self.stoi[c] for c in s]
 
-def get_batch(split: str) -> tuple[Tensor, Tensor]:
-    data = train_data if split == 'train' else val_data
-    ix = np.random.randint(0, len(data) - block_size, (batch_size,))  # type: ignore
-    x = stack([data[i:i+block_size] for i in ix])
-    y = stack([data[i+1:i+block_size+1] for i in ix])
-    return x, y
+    def decode(self, tokens: list[int]) -> str:
+        """Turn a list of token ids back into a string."""
+        return ''.join([self.itos[i] for i in tokens])
+
+
+class BatchSampler:
+    """Samples random (input, target) blocks from a token sequence."""
+
+    def __init__(self, data: Tensor, batch_size: int = BATCH_SIZE, block_size: int = BLOCK_SIZE) -> None:
+        self.data = data
+        self.batch_size = batch_size
+        self.block_size = block_size
+
+    def __call__(self) -> tuple[Tensor, Tensor]:
+        ix = np.random.randint(0, len(self.data) - self.block_size, (self.batch_size,))
+        x = stack([self.data[i:i + self.block_size] for i in ix])
+        y = stack([self.data[i + 1:i + self.block_size + 1] for i in ix])
+        return x, y
 
 
 class FeedForward(nn.Module):
@@ -120,7 +134,7 @@ class GPT(nn.Module):
             idx = concat([idx, idx_next], dim=-1)
         return idx
 
-    def generate_stream(self, idx: Tensor, max_new_tokens: int, temperature: float = 1.0):
+    def generate_stream(self, idx: Tensor, max_new_tokens: int, temperature: float = 1.0) -> Iterator[list[int]]:
         self.eval()
         for _ in range(max_new_tokens):
             logits = self(idx[:, -self.context_length:])  # type: ignore
@@ -138,12 +152,12 @@ class GPT(nn.Module):
         self.optimizer.step()
         return loss.item()
 
-    def train_epoch(self, epoch: int):
+    def train_epoch(self, epoch: int, sampler: BatchSampler, steps: int = STEPS_PER_EPOCH) -> list[float]:
         self.train()
-        with tqdm(range(5000), desc=f'Epoch {epoch}', file=sys.stdout) as pbar:
+        with tqdm(range(steps), desc=f'Epoch {epoch}', file=sys.stdout) as pbar:
             total_loss: list[float] = []
             for _ in pbar:
-                loss = self.train_step(*get_batch('train'))
+                loss = self.train_step(*sampler())
                 total_loss.append(loss)
                 pbar.set_postfix(loss=np.mean(total_loss))  # type: ignore
 
@@ -152,13 +166,21 @@ class GPT(nn.Module):
 
 def main() -> None:
     """Main entry point for the GPT training script."""
-    NUM_EPOCHS = 10
+    with open(DATASET_PATH, 'r') as file:
+        text = file.read()
+
+    tokenizer = CharTokenizer(text)
+    data = Tensor(tokenizer.encode(text))
+    n = int(0.9 * len(data))
+    train_sampler = BatchSampler(data[:n])
+
+    np.random.seed(1337)
     model = GPT(
-        vocab_size=vocab_size,
+        vocab_size=tokenizer.vocab_size,
         embedding_dim=128,
         num_layers=6,
         num_heads=8,
-        context_length=block_size,
+        context_length=BLOCK_SIZE,
         _mha_class=MultiheadAttentionSlow
     )
 
@@ -175,12 +197,12 @@ def main() -> None:
     print('Number of parameters:', model.num_params())
     for _ in range(NUM_EPOCHS):
         epoch += 1
-        model.train_epoch(epoch=epoch)
+        model.train_epoch(epoch=epoch, sampler=train_sampler)
         if epoch % 1 == 0:
             print('Generating text...')
             idx = Tensor([[0]])
             for token in model.generate_stream(idx, max_new_tokens=300, temperature=0.6):
-                print(decode(token), end='', flush=True)
+                print(tokenizer.decode(token), end='', flush=True)
             print()
 
         model.save(f'gpt_epoch_{epoch}.mt')
