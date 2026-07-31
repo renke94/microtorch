@@ -30,3 +30,5 @@ Thumbs.db
 
 **/.ipynb_checkpoints
 **/*.mt
+
+data/
