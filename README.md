@@ -55,7 +55,7 @@ model(x).sigmoid()
 ## More Examples
 
 - [MNIST Classification](notebooks/mnist.ipynb)
-- [GPT on Tiny Shakespeare](notebooks/MicroTorch%20GPT.ipynb)
+- [GPT with MicroTorch](notebooks/MicroTorch%20GPT.ipynb)
 
 ## Resources
 - [Deriving categorical cross entropy and softmax](https://shivammehta25.github.io/posts/deriving-categorical-cross-entropy-and-softmax/)
